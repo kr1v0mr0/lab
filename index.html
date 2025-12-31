@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Проверка попадания точки в область - Лабораторная работа</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        header {
+            background: #546B51;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+            position: relative;
+            text-align: center;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            width: 100%;
+        }
+
+        .header-text {
+            text-align: center;
+            flex: 1;
+        }
+
+        .header-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 5px;
+            border: 2px solid #2A3E33;
+            object-fit: cover;
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .header-image:hover {
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        header h1 {
+            font-family: serif;
+            color: #BABDA0;
+            font-size: 25px;
+            margin-bottom: 6px;
+        }
+
+        header h2 {
+            font-family: serif;
+            color: #BABDA0;
+            font-size: 20px;
+        }
+        
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background: #7D8A6E;
+            min-height: 100vh;
+            padding: 15px;
+        }
+        
+        .main-wrapper {
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+            transform: scale(0.95);
+            transform-origin: top center;
+        }
+        
+        .container {
+            display: flex;
+            background: #BABDA0;
+            border-radius: 12px 12px 0 0;
+            overflow: hidden;
+            box-shadow: 0 6px 20px #2A3E33;
+        }
+        
+        .left-column {
+            flex: 3;
+            padding: 18px;
+            border-right: 2px solid #2A3E33;
+        }
+        .form-header {
+            color: #2A3E33;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .right-column {
+            flex: 2;
+            padding: 18px;
+            background: #D1D5C8;
+        }
+        .status-bar {
+            background: #BABDA0;
+            padding: 10px;
+            border-top: 2px solid #2A3E33;
+            font-style: italic;
+            color: #2A3E33;
+            text-align: center;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 6px 20px #2A3E33;
+            margin-top: -2px;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #2A3E33;
+            font-size: 15px;
+        }
+        
+        input[type="text"] {
+            width: 120px;
+            padding: 12px;
+            border: 2px solid #bdc3c7;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: border-color 0.3s ease;
+            margin-top: 6px;
+        }
+        
+        input[type="text"]:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 4px rgba(52, 152, 219, 0.3);
+        }
+        
+        input[type="text"].error {
+            border-color: #e74c3c;
+            background-color: #ffeaea;
+        }
+        
+        button {
+            background: linear-gradient(0deg, #2A3E33, #404E41);
+            color: white;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            width: 100%;
+            margin-top: 25px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px #2A3E33;
+        }
+        
+        button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .error-message {
+            color: #e74c3c;
+            font-size: 13px;
+            margin-top: 6px;
+            min-height: 18px;
+        }
+        
+        .description {
+            background: #D1D5C8;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+            border: 1px solid #2A3E33;
+            text-align: center;
+        }
+        
+        .description h3 {
+            color: #2A3E33;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 16px;
+        }
+        
+        .description ul {
+            margin-left: 20px;
+            color: #2A3E33;
+            font-size: 14px;
+        }
+        
+        .description li {
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            font-size: 12px; 
+        }
+        
+        .results-table th {
+            background: linear-gradient(0deg, #2A3E33, #404E41);
+            color: white;
+            padding: 8px; 
+            text-align: center;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .results-table td {
+            padding: 6px; 
+            text-align: center;
+            border: 1px solid #ddd;
+            font-size: 11px;
+        }
+        
+        .results-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .results-table tr:hover {
+            background-color: #e3f2fd;
+        }
+        
+        .hit {
+            color: #27ae60;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        
+        .miss {
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 11px; 
+        }
+        
+        .results-header {
+            text-align: center;
+            color: #2A3E33;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #2A3E33;
+            font-size: 16px;
+        }
+    
+        .input-fields {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 25px;
+            margin-top: 15px;
+        }
+        
+        .input-field {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            background: #D1D5C8;
+            border-radius: 8px;
+            border: 1px solid #2A3E33;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        .fcgi-badge {
+            background: linear-gradient(0deg, #2A3E33, #404E41);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        #coordinate-plane {
+            border: 3px solid #57c476;
+            border-radius: 5px;
+            cursor: url(catcat.png) 2 2, default;
+        }
+        input[type="text"]::placeholder {
+            font-size: 13px;
+            color: #7f8c8d;
+        }
+        
+        .x-buttons-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        
+        .x-buttons {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 4px;
+            justify-content: center;
+            padding: 8px;
+        }
+        
+        .x-button {
+            padding: 6px 10px;
+            background: linear-gradient(0deg, #2A3E33, #404E41);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: bold;
+            font-size: 13px;
+            min-width: 34px;
+            white-space: nowrap;
+        }
+        
+        .x-button:hover {
+            background: linear-gradient(0deg, #404E41, #2A3E33);
+            transform: translateY(-1px);
+        }
+        
+        .x-button.selected {
+            background: linear-gradient(0deg, #57c476, #2A3E33);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+            background: #D1D5C8;
+            padding: 6px 10px;
+            border: 2px solid #2A3E33;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 13px;
+        }
+        
+        .radio-option:hover {
+            background: #2A3E33;
+            color: white;
+        }
+        
+        .radio-option input[type="radio"] {
+            margin-right: 4px;
+        }
+        
+        .radio-option.selected {
+            background: #2A3E33;
+            color: white;
+        }
+
+        .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.error-modal {
+    background: #BABDA0;
+    border-radius: 12px;
+    padding: 25px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    border: 2px solid #2A3E33;
+    position: relative;
+    animation: modalAppear 0.3s ease-out;
+}
+
+@keyframes modalAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+    .modal-header {
+        color: #2A3E33;
+        margin-bottom: 15px;
+        text-align: center;
+        font-size: 20px;
+        font-weight: bold;
+        border-bottom: 1px solid #2A3E33;
+        padding-bottom: 10px;
+    }
+
+    .modal-content {
+        color: #2A3E33;
+        margin-bottom: 20px;
+        line-height: 1.5;
+        font-size: 16px;
+    }
+
+    .modal-ok-button {
+        background: linear-gradient(0deg, #2A3E33, #404E41);
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition: all 0.2s ease;
+        display: block;
+        margin: 0 auto;
+        min-width: 100px;
+    }
+
+    .modal-ok-button:hover {
+        background: linear-gradient(0deg, #404E41, #2A3E33);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(42, 62, 51, 0.4);
+    }
+
+    .error-list {
+        text-align: left;
+        margin: 15px 0;
+        padding-left: 20px;
+    }
+
+    .error-list li {
+        margin-bottom: 8px;
+        color: #e74c3c;
+        font-weight: bold;
+    }
+
+    #modalMessage {
+        text-align: center;
+        margin-bottom: 15px;
+        font-weight: bold;
+    }
+
+    .success-modal .modal-header {
+        color: #27ae60;
+    }
+
+    .success-modal #modalMessage {
+        color: #27ae60;
+    }
+    </style>
+</head>
+<body>
+    <div class="main-wrapper">
+
+        <header>
+            <div class="header-container">
+                <div class="header-text">
+                    <h1>Проверка попадания точки в область</h1>
+                    <h2>Студент: Крылова Мария Дмитриевна | Группа: P3209 | Вариант: 466369</h2>
+                </div>
+                <img src="picturekoza.png" alt="График области попадания" class="header-image" 
+                     onerror="this.style.display='none'" onclick="redirectToIndex2()">
+            </div>
+        </header>
+
+        <div class="container">
+
+            <div class="left-column">
+
+                <div class="form-header">
+                    <h3>Ввод параметров</h3>
+                </div>
+
+                <form id="pointForm">
+                    <div class="input-field">
+                        <label for="x">Координата X:</label>
+                        <div class="x-buttons-container">
+                            <div class="x-buttons">
+                                <button type="button" class="x-button" data-value="-5">-5</button>
+                                <button type="button" class="x-button" data-value="-4">-4</button>
+                                <button type="button" class="x-button" data-value="-3">-3</button>
+                                <button type="button" class="x-button" data-value="-2">-2</button>
+                                <button type="button" class="x-button" data-value="-1">-1</button>
+                                <button type="button" class="x-button" data-value="0">0</button>
+                                <button type="button" class="x-button" data-value="1">1</button>
+                                <button type="button" class="x-button" data-value="2">2</button>
+                                <button type="button" class="x-button" data-value="3">3</button>
+                                <button type="button" class="x-button" data-value="4">4</button>
+                                <button type="button" class="x-button" data-value="5">5</button>
+                            </div>
+                        </div>
+                        <input type="hidden" id="x" name="x" value="">
+                        <div class="error-message" id="xError"></div>
+                    </div>
+                    
+                    <div class="input-field">
+                        <label for="y">Координата Y (-3 до 3):</label>
+                        <input type="text" id="y" name="y" placeholder="Например: -1.3">
+                        <div class="error-message" id="yError"></div>
+                    </div>
+                    
+                    <div class="input-field">
+                        <label for="r">Радиус R:</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="r" value="1"> 1
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="r" value="1.5"> 1.5
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="r" value="2"> 2
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="r" value="2.5"> 2.5
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="r" value="3"> 3
+                            </label>
+                        </div>
+                        <div class="error-message" id="rError"></div>
+                    </div>
+                    
+                    <button type="submit" id="submitBtn">Проверить попадание</button>
+                </form>
+
+                <div class="description">
+                    <h3>Заданная область</h3>
+                    <div class="canvas-container">
+                        <canvas id="coordinate-plane" width="400" height="400"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-column">
+                <div class="results-header">
+                    <h3>История результатов</h3>
+                </div>
+                
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>X</th>
+                            <th>Y</th>
+                            <th>R</th>
+                            <th>Результат</th>
+                            <th>Время запроса</th>
+                            <th>Время выполнения</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsTable">
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 25px; color: #7f8c8d;">
+                                Ожидание данных... Введите параметры и нажмите "Проверить"
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="status-bar" id="status">
+            Готов к работе. Введите координаты точки и радиус для проверки.
+        </div>
+    </div>
+
+    <!-- Модальное окно для ошибок -->
+    <div class="modal-overlay" id="messageModal">
+    <div class="error-modal">
+        <div class="modal-header" id="modalHeader">Сообщение</div>
+        <div class="modal-content">
+            <div id="modalMessage"></div>
+            <ul class="error-list" id="errorList">
+                <!-- Список ошибок будет здесь -->
+            </ul>
+            <p id="additionalInfo"></p>
+        </div>
+        <button class="modal-ok-button" onclick="closeMessageModal()">OK</button>
+    </div>
+    </div>
+    <script src="script.js"></script>
+    
+</body>
+</html>
